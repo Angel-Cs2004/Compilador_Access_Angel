@@ -1,45 +1,63 @@
 CXX      = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -O2
-TARGET   = compilador
+
 SRCDIR   = src
+BUILDDIR = build
+TARGET   = $(BUILDDIR)/compilador
+
 SRCS     = $(SRCDIR)/main.cpp \
            $(SRCDIR)/token.cpp \
            $(SRCDIR)/lexer.cpp \
            $(SRCDIR)/ast.cpp \
            $(SRCDIR)/parser.cpp
-OBJS     = $(SRCS:.cpp=.o)
+OBJS     = $(patsubst $(SRCDIR)/%.cpp, $(BUILDDIR)/%.o, $(SRCS))
 
-all: $(TARGET)
+# ── Compilacion ─────────────────────────────────────────────────────────────
+all: $(BUILDDIR) $(TARGET)
+
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(SRCDIR)/%.o: $(SRCDIR)/%.cpp
+$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-# Solo tokens (fase 1)
-tokens: $(TARGET)
-	./$(TARGET) --tokens ejemplos/completo.acc
-
-# Solo AST (fase 2)
-ast: $(TARGET)
-	./$(TARGET) --ast ejemplos/completo.acc
-
-# Ambas fases
-test: $(TARGET)
-	@echo "" && echo ">>> Prueba 1: basico.acc"
-	./$(TARGET) ejemplos/basico.acc
-	@echo "" && echo ">>> Prueba 2: condicion.acc"
-	./$(TARGET) ejemplos/condicion.acc
-	@echo "" && echo ">>> Prueba 3: completo.acc"
-	./$(TARGET) ejemplos/completo.acc
-	@echo "" && echo ">>> Prueba 4: errores.acc (debe mostrar errores)"
-	./$(TARGET) ejemplos/errores.acc; true
-
-run: $(TARGET)
+# ── Ejecucion ────────────────────────────────────────────────────────────────
+run: all
 	./$(TARGET)
 
+# ── Tests con ejemplos ────────────────────────────────────────────────────────
+test: all
+	@echo "" && echo ">>> Validos: basico"
+	./$(TARGET) ejemplos/validos/basico.acc
+	@echo "" && echo ">>> Validos: condicion"
+	./$(TARGET) ejemplos/validos/condicion.acc
+	@echo "" && echo ">>> Validos: completo"
+	./$(TARGET) ejemplos/validos/completo.acc
+	@echo "" && echo ">>> Errores: errores_lex (esperado: errores lexicos)"
+	./$(TARGET) ejemplos/errores/errores_lex.acc; true
+	@echo "" && echo ">>> Errores: errores_sint (esperado: errores sintacticos)"
+	./$(TARGET) ejemplos/errores/errores_sint.acc; true
+
+tokens: all
+	./$(TARGET) --tokens ejemplos/validos/completo.acc
+
+ast: all
+	./$(TARGET) --ast ejemplos/validos/completo.acc
+
+check: all
+	@echo "--- Validos ---"
+	./$(TARGET) --check ejemplos/validos/basico.acc
+	./$(TARGET) --check ejemplos/validos/condicion.acc
+	./$(TARGET) --check ejemplos/validos/completo.acc
+	@echo "--- Errores ---"
+	./$(TARGET) --check ejemplos/errores/errores_lex.acc;  true
+	./$(TARGET) --check ejemplos/errores/errores_sint.acc; true
+
+# ── Limpieza ─────────────────────────────────────────────────────────────────
 clean:
 	rm -f $(OBJS) $(TARGET)
 
-.PHONY: all tokens ast test run clean
+.PHONY: all run test tokens ast check clean

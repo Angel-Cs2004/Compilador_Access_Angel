@@ -1,0 +1,18 @@
+# Binarios y objetos compilados
+build/
+
+# Entorno virtual de Python
+venv/
+
+# Archivos temporales del sistema
+*.o
+*.a
+*.so
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*~
