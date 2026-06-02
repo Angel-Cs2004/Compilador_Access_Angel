@@ -9,7 +9,11 @@ SRCS     = $(SRCDIR)/main.cpp \
            $(SRCDIR)/token.cpp \
            $(SRCDIR)/lexer.cpp \
            $(SRCDIR)/ast.cpp \
-           $(SRCDIR)/parser.cpp
+           $(SRCDIR)/parser.cpp \
+           $(SRCDIR)/semantico.cpp \
+           $(SRCDIR)/codintermedio.cpp \
+           $(SRCDIR)/optimizador.cpp \
+           $(SRCDIR)/generador.cpp
 OBJS     = $(patsubst $(SRCDIR)/%.cpp, $(BUILDDIR)/%.o, $(SRCS))
 
 # ── Compilacion ─────────────────────────────────────────────────────────────
@@ -47,6 +51,12 @@ tokens: all
 ast: all
 	./$(TARGET) --ast ejemplos/validos/completo.acc
 
+ir: all
+	./$(TARGET) --ir ejemplos/validos/completo.acc
+
+gen: all
+	./$(TARGET) --gen ejemplos/validos/completo.acc
+
 check: all
 	@echo "--- Validos ---"
 	./$(TARGET) --check ejemplos/validos/basico.acc
@@ -60,4 +70,4 @@ check: all
 clean:
 	rm -f $(OBJS) $(TARGET)
 
-.PHONY: all run test tokens ast check clean
+.PHONY: all run test tokens ast ir gen check clean

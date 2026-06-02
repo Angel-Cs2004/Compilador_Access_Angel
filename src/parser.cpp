@@ -119,7 +119,10 @@ std::unique_ptr<NodoDeclaracion> Parser::parsearDeclaracion() {
     Token nombre = consumir(TipoToken::IDENTIFICADOR, "nombre de variable");
     consumir(TipoToken::COMO, "como");
     auto expr = parsearExpresion();
-    return std::make_unique<NodoDeclaracion>(nombre.valor, std::move(expr));
+    auto nodo = std::make_unique<NodoDeclaracion>(nombre.valor, std::move(expr));
+    nodo->linea   = nombre.linea;
+    nodo->columna = nombre.columna;
+    return nodo;
 }
 
 // -----------------------------------------------------------------------
@@ -156,12 +159,15 @@ std::unique_ptr<NodoCondicional> Parser::parsearCondicional() {
 // fin repetir
 // -----------------------------------------------------------------------
 std::unique_ptr<NodoBucleRepetir> Parser::parsearBucleRepetir() {
+    Token tok = actual();
     consumir(TipoToken::REPETIR, "repetir");
     auto veces = parsearExpresion();
     consumir(TipoToken::VECES, "veces");
     saltarNuevasLineas();
 
     auto nodo = std::make_unique<NodoBucleRepetir>();
+    nodo->linea   = tok.linea;
+    nodo->columna = tok.columna;
     nodo->veces  = std::move(veces);
     nodo->cuerpo = parsearBloque();
 
@@ -209,10 +215,13 @@ NodoPtr Parser::parsearExpresion() {
     auto izq = parsearTermino();
 
     while (esActual(TipoToken::MAS) || esActual(TipoToken::MENOS)) {
-        std::string op = actual().valor;
+        std::string op  = actual().valor;
+        int lin = actual().linea, col = actual().columna;
         avanzar();
         auto der = parsearTermino();
-        izq = std::make_unique<NodoOpBinaria>(std::move(izq), op, std::move(der));
+        auto res = std::make_unique<NodoOpBinaria>(std::move(izq), op, std::move(der));
+        res->linea = lin; res->columna = col;
+        izq = std::move(res);
     }
     return izq;
 }
@@ -221,10 +230,13 @@ NodoPtr Parser::parsearTermino() {
     auto izq = parsearFactor();
 
     while (esActual(TipoToken::POR) || esActual(TipoToken::ENTRE)) {
-        std::string op = actual().valor;
+        std::string op  = actual().valor;
+        int lin = actual().linea, col = actual().columna;
         avanzar();
         auto der = parsearFactor();
-        izq = std::make_unique<NodoOpBinaria>(std::move(izq), op, std::move(der));
+        auto res = std::make_unique<NodoOpBinaria>(std::move(izq), op, std::move(der));
+        res->linea = lin; res->columna = col;
+        izq = std::move(res);
     }
     return izq;
 }
@@ -248,8 +260,11 @@ NodoPtr Parser::parsearFactor() {
     // Identificador
     if (esActual(TipoToken::IDENTIFICADOR)) {
         std::string nombre = actual().valor;
+        int lin = actual().linea, col = actual().columna;
         avanzar();
-        return std::make_unique<NodoIdentificador>(nombre);
+        auto nodo = std::make_unique<NodoIdentificador>(nombre);
+        nodo->linea = lin; nodo->columna = col;
+        return nodo;
     }
     // Expresion entre parentesis
     if (esActual(TipoToken::PAREN_IZQ)) {
@@ -300,10 +315,13 @@ NodoPtr Parser::parsearCondicion() {
 }
 
 NodoPtr Parser::parsearCondicionBase() {
+    int lin = actual().linea, col = actual().columna;
     auto izq  = parsearExpresion();
     auto comp = parsearComparador();
     auto der  = parsearExpresion();
-    return std::make_unique<NodoComparacion>(std::move(izq), comp, std::move(der));
+    auto nodo = std::make_unique<NodoComparacion>(std::move(izq), comp, std::move(der));
+    nodo->linea = lin; nodo->columna = col;
+    return nodo;
 }
 
 // Consume los tokens del comparador y devuelve su forma canonica

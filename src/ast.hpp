@@ -10,6 +10,8 @@ using NodoPtr = std::unique_ptr<Nodo>;
 // Clase base — todos los nodos del AST heredan de aqui
 // -----------------------------------------------------------------------
 struct Nodo {
+    int linea   = -1;
+    int columna = -1;
     virtual ~Nodo() = default;
     virtual std::string tipoNodo() const = 0;
     // prefijo: cadena de indentacion acumulada

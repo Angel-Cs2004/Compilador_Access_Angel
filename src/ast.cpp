@@ -104,12 +104,14 @@ void NodoCondicional::imprimir(const std::string& p, bool u) const {
 
     bool tieneSino = !sino.empty();
 
-    // Condicion
+    // Condicion (nunca es el ultimo hijo — siempre le sigue "Entonces")
     condicion->imprimir(np, false);
 
-    // Bloque entonces
-    std::cout << DIM << np << RAMA << RST << BLU << BOLD << "Entonces\n" << RST;
-    std::string npEnt = np + VERT;
+    // Bloque entonces: es ultimo solo si no hay sino
+    std::string conEnton = tieneSino ? RAMA : ULTIMO;
+    std::string prefEnton = tieneSino ? VERT  : ESP;
+    std::cout << DIM << np << conEnton << RST << BLU << BOLD << "Entonces\n" << RST;
+    std::string npEnt = np + prefEnton;
     for (size_t i = 0; i < entonces.size(); i++)
         entonces[i]->imprimir(npEnt, i == entonces.size() - 1);
 
