@@ -19,3 +19,10 @@ Thumbs.db
 .idea/
 *.swp
 *~
+
+# Archivos temporales de VS Code (Code Runner)
+tempCodeRunnerFile.py
+
+# Configuración local de Claude Code
+.claude/
+CLAUDE.md
