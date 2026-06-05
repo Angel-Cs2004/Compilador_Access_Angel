@@ -3,6 +3,11 @@ build/
 
 # Entorno virtual de Python
 venv/
+__pycache__/
+*.py[cod]
+
+# Secretos locales
+.env
 
 # Modelos de voz (archivos grandes, se descargan con instalar.sh)
 voz/models/
