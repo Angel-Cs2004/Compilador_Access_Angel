@@ -11,19 +11,19 @@ echo ""
 echo "=== Instalando dependencias del modo voz ==="
 echo ""
 
-echo "[1/4] Instalando python-pyaudio (micrófono)..."
-sudo pacman -S --noconfirm python-pyaudio
+echo "[1/5] Instalando python-pyaudio, espeak-ng y alsa-utils..."
+sudo pacman -S --noconfirm python-pyaudio espeak-ng alsa-utils
 
 echo ""
-echo "[2/4] Creando entorno virtual Python en ./venv/ ..."
+echo "[2/5] Creando entorno virtual Python en ./venv/ ..."
 python3 -m venv --system-site-packages venv
 
 echo ""
-echo "[3/4] Instalando Vosk (reconocimiento offline) en el entorno virtual..."
-venv/bin/pip install --quiet vosk
+echo "[3/5] Instalando dependencias Python de la GUI y voz..."
+venv/bin/pip install --quiet vosk pyttsx3 edge-tts customtkinter groq
 
 echo ""
-echo "[4/4] Descargando modelo de español (~39 MB)..."
+echo "[4/5] Descargando modelo de español (~39 MB)..."
 mkdir -p voz/models
 cd voz/models
 
@@ -42,8 +42,15 @@ fi
 cd "$ROOT_DIR"
 
 echo ""
+echo "[5/5] Compilando el proyecto si hace falta..."
+make
+
+echo ""
 echo "=== Instalación completada ==="
 echo ""
-echo "Para usar el modo voz:"
+echo "Para usar la GUI:"
+echo "  venv/bin/python3 gui.py"
+echo ""
+echo "Para usar el modo voz por terminal:"
 echo "  bash voz/ejecutar.sh"
 echo ""
